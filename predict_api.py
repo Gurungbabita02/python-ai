@@ -32,7 +32,7 @@ async def predict(request: Request):
         # Make the prediction
         predicted_crash = model.predict([[avg_last5]])[0]
 
-        return { "predicted_crash": round(predicted_crash, 2) }
+        return { "predicted_crash": float(round(predicted_crash, 2)) }
 
     except Exception as e:
         return { "error": f"Server error: {str(e)}" }
