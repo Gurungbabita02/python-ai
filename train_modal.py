@@ -4,30 +4,32 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import joblib
 
-# Simulate realistic crash data
+# Simulate crash data (replace this with real historical crash data if available)
 np.random.seed(42)
-crash_data = np.random.uniform(1.0, 10.0, 1000)  # Simulate 1000 crash points
+crash_data = np.random.uniform(1.0, 10.0, 1000)
 
-# Create a DataFrame
-data = pd.DataFrame({ 'crash': crash_data })
+# Generate dataset: 5 previous crash points as features, next as target
+data = []
+for i in range(len(crash_data) - 5):
+    features = crash_data[i:i+5]
+    target = crash_data[i+5]
+    data.append(list(features) + [target])
 
-# Create the feature: rolling average of last 5 crashes (as input for prediction)
-data['avg_last5'] = data['crash'].rolling(window=5).mean().shift(1)
+# Create DataFrame
+columns = [f'cp{i+1}' for i in range(5)] + ['target']
+df = pd.DataFrame(data, columns=columns)
 
-# Drop rows with NaN (first 5 rows due to rolling + shift)
-data = data.dropna()
+# Features and target
+X = df[[f'cp{i+1}' for i in range(5)]]
+y = df['target']
 
-# Define features (X) and target (y)
-X = data[['avg_last5']]
-y = data['crash']
-
-# Split into training and test data
+# Split into train/test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train the Linear Regression model
+# Train model
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Save the trained model
+# Save model
 joblib.dump(model, 'crash_predictor.pkl')
 print("✅ Model trained and saved as crash_predictor.pkl")
